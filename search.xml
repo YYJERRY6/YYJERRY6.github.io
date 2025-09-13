@@ -4,6 +4,19 @@
   
     
     <entry>
+      <title>github recommend</title>
+      <link href="/2025/09/13/github-recommend/"/>
+      <url>/2025/09/13/github-recommend/</url>
+      
+        <content type="html"><![CDATA[<h1 id="软件名称"><a href="#软件名称" class="headerlink" title="[软件名称]"></a>[软件名称]</h1><blockquote><p><strong>一句话简介</strong>（突出核心价值）<br>⏰ 最后更新：YYYY-MM-DD | ✅ 当前版本：vX.X  </p></blockquote><hr><h2 id="🌟-核心亮点"><a href="#🌟-核心亮点" class="headerlink" title="🌟 核心亮点"></a>🌟 核心亮点</h2><ul><li><strong>特色功能1</strong>（如：实时预览、跨平台支持）  </li><li><strong>特色功能2</strong>（如：一键导出PDF&#x2F;HTML）  </li><li><strong>特色功能3</strong>（如：自定义CSS模板）<br><em>示例：Typora支持实时渲染与主题切换 [[2][6][15]]</em></li></ul><hr><h2 id="🎯-适用场景"><a href="#🎯-适用场景" class="headerlink" title="🎯 适用场景"></a>🎯 适用场景</h2><ol><li><strong>技术文档</strong>（自动生成目录&#x2F;API文档）<br><em>示例：markdown-template-api的导航功能 [[1]]</em>  </li><li><strong>简历制作</strong>（专业排版&#x2F;导出打印）<br><em>示例：typora-markdown-resume的CSS定制 [[6]]</em>  </li><li><strong>学术写作</strong>（LaTeX公式&#x2F;代码块支持）<br><em>示例：Cmd Markdown的学术场景支持 [[4]]</em></li></ol><hr><h2 id="🛠️-配置与使用"><a href="#🛠️-配置与使用" class="headerlink" title="🛠️ 配置与使用"></a>🛠️ 配置与使用</h2><h3 id="基础配置"><a href="#基础配置" class="headerlink" title="基础配置"></a>基础配置</h3><p><em>参考：VSCode自定义模板配置 [[3]]</em></p><h3 id="高级技巧"><a href="#高级技巧" class="headerlink" title="高级技巧"></a>高级技巧</h3><ul><li><strong>导出PDF</strong>：用Typora或MacDown导出打印优化版 [[5]]  </li><li><strong>云端同步</strong>：小书匠支持备份至GitHub&#x2F;印象笔记 [[7]]</li></ul><hr><h2 id="🔗-资源推荐"><a href="#🔗-资源推荐" class="headerlink" title="🔗 资源推荐"></a>🔗 资源推荐</h2><ol><li>[标准化模板库]  <ul><li>API文档模板：<code>chris-peng/markdown-template-api</code> [[1]]  </li><li>简历模板：<code>stick-i/markdown-resume-template</code> [[2]]</li></ul></li><li>[扩展工具]  <ul><li>迅捷画图：Markdown+流程图整合 [[12]]  </li><li>Mdx-editor：微信排版专用 [[20]]</li></ul></li></ol><hr><h2 id="⚠️-注意事项"><a href="#⚠️-注意事项" class="headerlink" title="⚠️ 注意事项"></a>⚠️ 注意事项</h2><ol><li>部分工具（如Typora）已转为收费模式，可改用VSCode插件替代 [[3][15]]  </li><li>需开启Typora的扩展语法支持标题高亮 [[2]]  </li><li>学术写作建议验证LaTeX渲染兼容性 [[4]]</li></ol>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>ai生成markdown语法测试</title>
       <link href="/2025/03/16/hello-world/"/>
       <url>/2025/03/16/hello-world/</url>
