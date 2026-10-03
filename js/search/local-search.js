@@ -172,11 +172,15 @@ class LocalSearch {
 
   fetchData () {
     const isXml = !this.path.endsWith('json')
-    fetch(this.path)
-      .then(response => response.text())
+    if (this.pending) return this.pending
+    this.pending = fetch(this.path)
+      .then(response => {
+        if (!response.ok) throw new Error('Search HTTP ' + response.status)
+        return response.text()
+      })
       .then(res => {
         // Get the contents from search data
-        this.isfetched = true
+        if (isXml && new DOMParser().parseFromString(res, 'text/xml').querySelector('parsererror')) throw new Error('Invalid search XML')
         this.datas = isXml
           ? [...new DOMParser().parseFromString(res, 'text/xml').querySelectorAll('entry')].map(element => ({
               title: element.querySelector('title').textContent,
@@ -191,9 +195,16 @@ class LocalSearch {
           data.url = decodeURIComponent(data.url).replace(/\/{2,}/g, '/')
           return data
         })
+        this.isfetched = true
         // Remove loading animation
         window.dispatchEvent(new Event('search:loaded'))
       })
+      .catch(() => {
+        this.isfetched = false
+        window.dispatchEvent(new Event('search:error'))
+      })
+      .finally(() => { this.pending = null })
+    return this.pending
   }
 
   // Highlight by wrapping node in mark elements with the given class name
@@ -234,7 +245,7 @@ class LocalSearch {
   }
 }
 
-window.addEventListener('load', () => {
+const initLocalSearch = () => {
 // Search
   const { path, top_n_per_article, unescape, languages } = GLOBAL_CONFIG.localSearch
   const localSearch = new LocalSearch({
@@ -305,8 +316,12 @@ window.addEventListener('load', () => {
     btf.animateIn($searchMask, 'to_show 0.5s')
     btf.animateIn($searchDialog, 'titleScale 0.5s')
     setTimeout(() => { input.focus() }, 300)
+    if (!localSearch.isfetched) {
+      const loading = document.getElementById('loading-database')
+      if (loading) loading.textContent = '正在加载搜索索引…'
+      localSearch.fetchData()
+    }
     if (!loadFlag) {
-      !localSearch.isfetched && localSearch.fetchData()
       input.addEventListener('input', inputEventFunction)
       loadFlag = true
     }
@@ -344,8 +359,23 @@ window.addEventListener('load', () => {
 
   window.addEventListener('search:loaded', () => {
     const $loadDataItem = document.getElementById('loading-database')
-    $loadDataItem.nextElementSibling.style.display = 'block'
-    $loadDataItem.remove()
+    if ($loadDataItem) {
+      $loadDataItem.nextElementSibling.style.display = 'block'
+      $loadDataItem.remove()
+    }
+    inputEventFunction()
+  })
+
+  window.addEventListener('search:error', () => {
+    const loading = document.getElementById('loading-database')
+    if (loading) {
+      loading.textContent = '搜索加载失败，请重试。'
+      const retry = document.createElement('button')
+      retry.type = 'button'
+      retry.textContent = '重试'
+      retry.onclick = () => localSearch.fetchData()
+      loading.appendChild(retry)
+    }
   })
 
   searchClickFn()
@@ -357,4 +387,10 @@ window.addEventListener('load', () => {
     localSearch.highlightSearchWords(document.getElementById('article-container'))
     searchClickFn()
   })
-})
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLocalSearch, { once: true })
+} else {
+  initLocalSearch()
+}
