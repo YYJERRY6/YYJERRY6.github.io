@@ -124,7 +124,7 @@ class LocalSearch {
         const { position } = item
         // Cut out 120 characters. The maxlength of .search-input is 80.
         const start = Math.max(0, position - 20)
-        const end = Math.min(content.length, position + 100)
+        const end = Math.min(content.length, position + Math.max(100, item.word.length))
         slicesOfContent.push(this.mergeIntoSlice(start, end, indexOfContent))
       }
 
@@ -156,10 +156,10 @@ class LocalSearch {
       }
 
       slicesOfContent.forEach(slice => {
-        resultItem += `<p class="search-result">${this.highlightKeyword(content, slice)}...</p></a>`
+        resultItem += `<p class="search-result">${this.highlightKeyword(content, slice)}...</p>`
       })
 
-      resultItem += '</li>'
+      resultItem += '</a></li>'
       resultItems.push({
         item: resultItem,
         id: resultItems.length,
@@ -234,7 +234,7 @@ class LocalSearch {
     const walk = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, null)
     const allNodes = []
     while (walk.nextNode()) {
-      if (!walk.currentNode.parentNode.matches('button, select, textarea, .mermaid')) allNodes.push(walk.currentNode)
+      if (!walk.currentNode.parentNode.closest('button, select, textarea, script, style, .mermaid, mark.search-keyword')) allNodes.push(walk.currentNode)
     }
     allNodes.forEach(node => {
       const [indexOfNode] = this.getIndexByWord(keywords, node.nodeValue)
@@ -303,6 +303,10 @@ const initLocalSearch = () => {
   let loadFlag = false
   const $searchMask = document.getElementById('search-mask')
   const $searchDialog = document.querySelector('#local-search .search-dialog')
+  let focusTimer
+  const onSearchKeydown = event => {
+    if (event.code === 'Escape') closeSearch()
+  }
 
   // fix safari
   const fixSafariHeight = () => {
@@ -315,7 +319,8 @@ const initLocalSearch = () => {
     btf.overflowPaddingR.add()
     btf.animateIn($searchMask, 'to_show 0.5s')
     btf.animateIn($searchDialog, 'titleScale 0.5s')
-    setTimeout(() => { input.focus() }, 300)
+    clearTimeout(focusTimer)
+    focusTimer = setTimeout(() => { input.focus() }, 300)
     if (!localSearch.isfetched) {
       const loading = document.getElementById('loading-database')
       if (loading) loading.textContent = '正在加载搜索索引…'
@@ -326,18 +331,15 @@ const initLocalSearch = () => {
       loadFlag = true
     }
     // shortcut: ESC
-    document.addEventListener('keydown', function f (event) {
-      if (event.code === 'Escape') {
-        closeSearch()
-        document.removeEventListener('keydown', f)
-      }
-    })
+    document.addEventListener('keydown', onSearchKeydown)
 
     fixSafariHeight()
     window.addEventListener('resize', fixSafariHeight)
   }
 
   const closeSearch = () => {
+    clearTimeout(focusTimer)
+    document.removeEventListener('keydown', onSearchKeydown)
     btf.overflowPaddingR.remove()
     btf.animateOut($searchDialog, 'search_close .5s')
     btf.animateOut($searchMask, 'to_hide 0.5s')
