@@ -3,13 +3,27 @@
   window.__localMusicInstalled = true
   let active = null
 
+  const release = () => {
+    if (!active) return
+    const previous = active
+    active = null
+    ++previous.attempt
+    clearTimeout(previous.timer)
+    previous.listeners.abort()
+    previous.audio.pause()
+    previous.audio.removeAttribute('src')
+    previous.audio.load()
+  }
+
   const init = () => {
     const root = document.querySelector('[data-local-music]')
     if (!root || active?.root === root) return
+    release()
     const audio = root.querySelector('[data-music-audio]')
     const status = root.querySelector('[data-music-status]')
     const retry = root.querySelector('[data-music-retry]')
-    const state = { root, audio, status, retry, attempt: 0, timer: null }
+    const state = { root, audio, status, retry, attempt: 0, timer: null, listeners: new AbortController() }
+    const listen = (target, event, handler) => target.addEventListener(event, handler, { signal: state.listeners.signal })
     active = state
     const message = (text, canRetry = false) => {
       if (active !== state) return
@@ -21,20 +35,20 @@
       clearTimeout(state.timer)
       state.timer = setTimeout(() => message('加载时间较长，可以重试或单独打开音频。', true), 12000)
     }
-    audio.addEventListener('waiting', waiting)
-    audio.addEventListener('playing', () => {
+    listen(audio, 'waiting', waiting)
+    listen(audio, 'playing', () => {
       clearTimeout(state.timer)
       message('正在播放')
     })
-    audio.addEventListener('pause', () => {
+    listen(audio, 'pause', () => {
       clearTimeout(state.timer)
       if (!audio.error) message('已暂停')
     })
-    audio.addEventListener('ended', () => {
+    listen(audio, 'ended', () => {
       clearTimeout(state.timer)
       message('播放完毕，可以选择下一首。')
     })
-    audio.addEventListener('error', () => {
+    listen(audio, 'error', () => {
       clearTimeout(state.timer)
       const errors = {
         1: '播放已中断，请重试。',
@@ -53,7 +67,7 @@
         message(error.name === 'NotAllowedError' ? '浏览器阻止了播放，请点击播放器里的播放按钮。' : '播放失败，请重试或单独打开音频。', true)
       })
     }
-    root.addEventListener('click', event => {
+    listen(root, 'click', event => {
       const button = event.target.closest('[data-music-src]')
       if (button) {
         ++state.attempt
@@ -74,16 +88,9 @@
       }
     })
   }
-  document.addEventListener('pjax:send', () => {
-    if (!active) return
-    const previous = active
-    active = null
-    ++previous.attempt
-    clearTimeout(previous.timer)
-    previous.audio.pause()
-    previous.audio.removeAttribute('src')
-    previous.audio.load()
-  })
+  document.addEventListener('pjax:send', release)
+  window.addEventListener('pagehide', release)
+  window.addEventListener('pageshow', init)
   document.addEventListener('pjax:complete', init)
   init()
 })()
